@@ -13,11 +13,11 @@ const router = Router();
 
 // Private routes
 router.get("/:userId", verifyToken, getUserByIdController);
-router.post("/register", verifyToken, registerUser);
 router.put("/update/:userId", verifyToken, updateUserController);
+router.delete("/delete/:userId", verifyToken, deleteUserById);
 
 // Public routes
 router.get("", getAllUsersController);
-router.delete("/delete/:userId", deleteUserById);
+router.post("/register", registerUser);
 
 export default router;
