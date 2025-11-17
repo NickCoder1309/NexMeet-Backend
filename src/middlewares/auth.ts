@@ -17,10 +17,9 @@ export async function verifyToken(
 
     const decodedToken = await admin.auth().verifyIdToken(idToken);
 
-    // Guarda el usuario decodificado en la request
     (req as any).user = decodedToken;
 
-    next(); // 🔥 Continua hacia la ruta
+    next();
   } catch (err) {
     return res.status(401).json({ error: "Token inválido o expirado" });
   }
