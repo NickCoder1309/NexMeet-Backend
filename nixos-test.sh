@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/run/current-system/sw/bin/bash
 set -e
 
 BASE_URL="http://localhost:3000/api/users"
