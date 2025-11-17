@@ -11,12 +11,12 @@ import {
 
 const router = Router();
 
-// Rutas protegidas
+// Private routes
 router.get("/:userId", verifyToken, getUserByIdController);
 router.post("/register", verifyToken, registerUser);
 router.put("/update/:userId", verifyToken, updateUserController);
 
-// Rutas públicas
+// Public routes
 router.get("", getAllUsersController);
 router.delete("/delete/:userId", deleteUserById);
 
