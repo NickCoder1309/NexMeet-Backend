@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { verifyToken } from "../middlewares/auth";
 
 import {
   registerUser,
@@ -10,10 +11,13 @@ import {
 
 const router = Router();
 
-router.get("/:userId", getUserByIdController);
+// Rutas protegidas
+router.get("/:userId", verifyToken, getUserByIdController);
+router.post("/register", verifyToken, registerUser);
+router.put("/update/:userId", verifyToken, updateUserController);
+
+// Rutas públicas
 router.get("", getAllUsersController);
-router.post("/register", registerUser);
-router.put("/update/:userId", updateUserController);
 router.delete("/delete/:userId", deleteUserById);
 
 export default router;
