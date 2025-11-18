@@ -37,6 +37,30 @@ class UserDAO {
     }
   }
 
+  async getUserByEmail(
+    email: string,
+  ): Promise<
+    | { success: true; id: string; data: User }
+    | { success: false; id: null; data: null; error?: string }
+  > {
+    try {
+      const snap = await this.collectionRef
+        .where("email", "==", email)
+        .limit(1)
+        .get();
+
+      if (snap.empty) {
+        return { success: false, id: null, data: null };
+      }
+
+      const doc = snap.docs[0];
+      return { success: true, id: doc.id, data: doc.data() as User };
+    } catch (err: any) {
+      console.error("Error consiguiendo usuario:", err);
+      return { success: false, id: null, data: null, error: err?.message };
+    }
+  }
+
   async getAllUsers(): Promise<
     { success: true; users: any[] } | { success: false; error: string }
   > {
