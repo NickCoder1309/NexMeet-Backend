@@ -15,9 +15,9 @@ const router = Router();
 router.get("/:userId", verifyToken, getUserByIdController);
 router.put("/update/:userId", verifyToken, updateUserController);
 router.delete("/delete/:userId", verifyToken, deleteUserById);
+router.post("/register", verifyToken, registerUser);
 
 // Public routes
 router.get("", getAllUsersController);
-router.post("/register", registerUser);
 
 export default router;
