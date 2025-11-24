@@ -37,17 +37,12 @@ export async function getAllMeetingsController(req: Request, res: Response) {
 
 export async function createMeetingController(req: Request, res: Response) {
   try {
-    const { userId, socketId, description } = req.body;
+    const { userId, description } = req.body;
     console.log("UserId: ", userId);
     if (!userId)
       return res
         .status(400)
         .json({ error: "Falta proporcionar el id del usuario" });
-
-    if (!socketId)
-      return res
-        .status(400)
-        .json({ error: "Falta proporcionar el id del socket" });
 
     const user = await UserDAO.getUserById(userId);
     if (!user.success)
