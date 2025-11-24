@@ -50,7 +50,7 @@ export async function createMeetingController(req: Request, res: Response) {
 
     const meeting = await MeetingDAO.createMeeting({
       userId,
-      description,
+      description: description ?? null,
     });
 
     return res.status(201).json(meeting);
