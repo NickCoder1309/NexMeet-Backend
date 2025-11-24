@@ -7,10 +7,9 @@ const db = admin.firestore();
 
 export interface Meeting {
   userId?: string | null;
-  socketId?: string | null;
   description?: string | null;
   is_active?: boolean | null;
-  active_users?: UserwithSocketId[] | [];
+  active_users?: UserWithSocketId[] | [];
   startAt?: Timestamp | null;
   finishAt?: Timestamp | null;
   createdAt?: Timestamp | null;
@@ -20,7 +19,7 @@ export interface MeetingWithId extends Meeting {
   id: string;
 }
 
-export interface UserwithSocketId extends User {
+export interface UserWithSocketId extends User {
   userId: string;
   socketId: string;
 }
@@ -100,13 +99,8 @@ class MeetingDAO {
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       } as Meeting);
 
-      const socketId = meetingData.socketId;
-      const userId = meetingData.userId;
-      const userRef = await UserDAO.getUserById(userId!);
-      const userData = userRef.data;
-
-      await this.collectionRef.doc(docRef.id).update({
-        active_users: [{ userId, socketId, ...userData }],
+      await docRef.update({
+        active_users: [],
       });
 
       return { success: true, id: docRef.id };
