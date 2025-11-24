@@ -1,7 +1,7 @@
 import admin from "../lib/firebaseAdmin";
 
 import { FieldValue, type Timestamp } from "firebase-admin/firestore";
-import { User } from "./UserDAO";
+import UserDAO, { User } from "./UserDAO";
 
 const db = admin.firestore();
 
@@ -10,7 +10,7 @@ export interface Meeting {
   socketId?: string | null;
   description?: string | null;
   is_active?: boolean | null;
-  active_users?: [userId: string, socketId: string][] | [];
+  active_users?: UserwithSocketId[] | [];
   startAt?: Timestamp | null;
   finishAt?: Timestamp | null;
   createdAt?: Timestamp | null;
@@ -18,6 +18,11 @@ export interface Meeting {
 
 export interface MeetingWithId extends Meeting {
   id: string;
+}
+
+export interface UserwithSocketId extends User {
+  userId: string;
+  socketId: string;
 }
 
 export type MeetingCreate = Omit<
@@ -95,10 +100,13 @@ class MeetingDAO {
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       } as Meeting);
 
+      const socketId = meetingData.socketId;
       const userId = meetingData.userId;
+      const userRef = await UserDAO.getUserById(userId!);
+      const userData = userRef.data;
 
       await this.collectionRef.doc(docRef.id).update({
-        active_users: [[userId, meetingData.socketId]],
+        active_users: [{ userId, socketId, ...userData }],
       });
 
       return { success: true, id: docRef.id };
@@ -153,8 +161,11 @@ class MeetingDAO {
     { success: true; meeting: Meeting } | { success: false; error: string }
   > {
     try {
+      const userRef = await UserDAO.getUserById(userId);
+      const userData = userRef.data;
+
       await this.collectionRef.doc(meetingId).update({
-        active_users: FieldValue.arrayUnion([userId, socketId]),
+        active_users: FieldValue.arrayUnion({ userId, socketId, ...userData }),
       });
       return {
         success: true,
@@ -176,8 +187,11 @@ class MeetingDAO {
     { success: true; meeting: Meeting } | { success: false; error: string }
   > {
     try {
+      const userRef = await UserDAO.getUserById(userId);
+      const userData = userRef.data;
+
       await this.collectionRef.doc(meetingId).update({
-        active_users: FieldValue.arrayRemove([userId, socketId]),
+        active_users: FieldValue.arrayRemove({ userId, socketId, ...userData }),
       });
       return {
         success: true,
@@ -187,6 +201,48 @@ class MeetingDAO {
       };
     } catch (err: any) {
       console.error("Error eliminando Id de Usuario de la reunión:", err);
+      return { success: false, error: err?.message ?? "Error desconocido" };
+    }
+  }
+
+  async updateUserMeetingSocketId(
+    meetingId: string,
+    userId: string,
+    newSocketId: string,
+  ): Promise<
+    { success: true; meeting: Meeting } | { success: false; error: string }
+  > {
+    try {
+      const meetingSnap = await this.collectionRef.doc(meetingId).get();
+      if (!meetingSnap.exists) {
+        return { success: false, error: "Meeting not found" };
+      }
+
+      const meetingData = meetingSnap.data() as Meeting;
+      const updatedActiveUsers = (meetingData.active_users || []).map(
+        (user) => {
+          if (user.userId === userId) {
+            return { ...user, socketId: newSocketId };
+          }
+          return user;
+        },
+      );
+
+      await this.collectionRef.doc(meetingId).update({
+        active_users: updatedActiveUsers,
+      });
+
+      return {
+        success: true,
+        meeting: (
+          await this.collectionRef.doc(meetingId).get()
+        ).data() as Meeting,
+      };
+    } catch (err: any) {
+      console.error(
+        "Error actualizando el Socket ID del usuario en la reunión:",
+        err,
+      );
       return { success: false, error: err?.message ?? "Error desconocido" };
     }
   }

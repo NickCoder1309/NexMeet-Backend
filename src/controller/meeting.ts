@@ -9,9 +9,7 @@ export async function getMeetingByIdController(req: Request, res: Response) {
     if (!meeting.success) {
       return res.status(400).json({ error: "No se encuentra la reunión" });
     }
-    return res
-      .status(200)
-      .json({ message: "Reunión encontrada: ", meeting: meeting.data });
+    return res.status(200).json(meeting.data);
   } catch (error) {
     return res.status(500).json({
       error: error instanceof Error ? error.message : "Error inesperado",
@@ -95,7 +93,7 @@ export async function updateMeetingController(req: Request, res: Response) {
   }
 }
 
-export async function addUserMeetingController(req: Request, res: Response) {
+export async function updateOrAddMeetingUser(req: Request, res: Response) {
   try {
     const meetingId = req.params.meetingId;
     const { userId, socketId } = req.body;
@@ -115,6 +113,32 @@ export async function addUserMeetingController(req: Request, res: Response) {
         .status(400)
         .json({ error: "Falta propociar el id de la reunión" });
 
+    const meeting = await MeetingDAO.getMeetingById(meetingId);
+
+    if (!meeting.data?.active_users) {
+      return res
+        .status(400)
+        .json({ error: "No se encuentra los usuarios de la reunión" });
+    }
+
+    const user_exists = meeting.data.active_users.some(
+      (user) => user.userId === userId,
+    );
+
+    if (user_exists) {
+      const response = await MeetingDAO.updateUserMeetingSocketId(
+        meetingId,
+        userId,
+        socketId,
+      );
+      if (!response.success) {
+        return res
+          .status(404)
+          .json({ error: "No se logró actualizar el usuario en la reunión" });
+      }
+      return res.status(200).json(response.meeting.active_users);
+    }
+
     const response = await MeetingDAO.addUserMeeting(
       meetingId,
       userId,
@@ -125,10 +149,7 @@ export async function addUserMeetingController(req: Request, res: Response) {
         .status(404)
         .json({ error: "No se logró agregar el usuario a la reunión" });
     }
-    return res.status(200).json({
-      message: "Usuario agregado exitosamente",
-      meeting_participants: response.meeting.active_users,
-    });
+    return res.status(200).json(response.meeting.active_users);
   } catch (error) {
     return res.status(500).json({
       error: error instanceof Error ? error.message : "Error inesperado",
@@ -166,10 +187,7 @@ export async function removeUserMeetingController(req: Request, res: Response) {
         .status(404)
         .json({ error: "No se logró eliminar el usuario a la reunión" });
     }
-    return res.status(200).json({
-      message: "Usuario removido exitosamente",
-      meeting_participants: response.meeting.active_users,
-    });
+    return res.status(200).json(response.meeting.active_users);
   } catch (error) {
     return res.status(500).json({
       error: error instanceof Error ? error.message : "Error inesperado",
@@ -213,51 +231,7 @@ export async function getMeetingUsers(req: Request, res: Response) {
         .json({ error: "No se encontró una reunión con ese ID" });
     }
 
-    return res.status(200).json({
-      message: "Usuarios encontrados exitosamente",
-      meeting_participants: response.data.active_users,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      error: error instanceof Error ? error.message : "Error inesperado",
-    });
-  }
-}
-
-export async function getAllUsersInfoinMeeting(req: Request, res: Response) {
-  try {
-    const meetingId = req.params.meetingId;
-    if (!meetingId)
-      return res
-        .status(400)
-        .json({ error: "Falta propociar el id de la reunión" });
-
-    const meetingResponse = await MeetingDAO.getMeetingById(meetingId);
-    if (!meetingResponse.success) {
-      return res
-        .status(404)
-        .json({ error: "No se encontró una reunión con ese ID" });
-    }
-
-    const userIds = meetingResponse.data.active_users;
-    if (!userIds) {
-      return res.status(200).json({
-        message: "No hay usuarios activos en la reunión",
-        users: [],
-      });
-    }
-    const usersInfo = [];
-    for (const [userId, _] of userIds) {
-      const userResponse = await UserDAO.getUserById(userId);
-      if (userResponse.success) {
-        usersInfo.push(userResponse.data);
-      }
-    }
-
-    return res.status(200).json({
-      message: "Información de usuarios en la reunión obtenida exitosamente",
-      users: usersInfo,
-    });
+    return res.status(200).json(response.data.active_users);
   } catch (error) {
     return res.status(500).json({
       error: error instanceof Error ? error.message : "Error inesperado",
