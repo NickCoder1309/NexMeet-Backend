@@ -1,17 +1,23 @@
 import admin from "../lib/firebaseAdmin";
 
 import { FieldValue, type Timestamp } from "firebase-admin/firestore";
+import { User } from "./UserDAO";
 
 const db = admin.firestore();
 
 export interface Meeting {
   userId?: string | null;
+  socketId?: string | null;
   description?: string | null;
   is_active?: boolean | null;
   active_users?: string[] | [];
   startAt?: Timestamp | null;
   finishAt?: Timestamp | null;
   createdAt?: Timestamp | null;
+}
+
+export interface MeetingWithId extends Meeting {
+  id: string;
 }
 
 export type MeetingCreate = Omit<
@@ -29,7 +35,7 @@ class MeetingDAO {
   private collectionRef = db.collection("meetings");
 
   async getAllMeeting(): Promise<
-    | { success: true; data: Meeting[] }
+    | { success: true; data: MeetingWithId[] }
     | { success: false; data: null; error?: string }
   > {
     try {
@@ -37,9 +43,15 @@ class MeetingDAO {
       if (!snap) {
         return { success: false, data: null };
       }
-      return { success: true, data: snap.docs as Meeting[] };
+      return {
+        success: true,
+        data: snap.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        })),
+      };
     } catch (err: any) {
-      console.error("Error consiguiendo la reunión:", err);
+      console.error("Error consiguiendo las reuniones:", err);
       return {
         success: false,
         data: null,
@@ -82,9 +94,13 @@ class MeetingDAO {
         startAt: admin.firestore.FieldValue.serverTimestamp(),
         createdAt: admin.firestore.FieldValue.serverTimestamp(),
       } as Meeting);
-      await docRef.update({
-        active_users: FieldValue.arrayUnion(meetingData.userId),
+
+      const userId = meetingData.userId;
+
+      await this.collectionRef.doc(docRef.id).update({
+        active_users: [userId],
       });
+
       return { success: true, id: docRef.id };
     } catch (err: any) {
       console.error("Error añadiendo documento", err);
@@ -119,8 +135,9 @@ class MeetingDAO {
     try {
       await this.collectionRef.doc(meetingId).update({
         is_active: false,
+        active_users: [],
         finishAt: admin.firestore.FieldValue.serverTimestamp(),
-      } as Partial<Meeting>);
+      });
       return { success: true };
     } catch (err: any) {
       console.error("Error actualizando documento:", err);
@@ -132,7 +149,7 @@ class MeetingDAO {
     meetingId: string,
     userId: string,
   ): Promise<
-    { success: true; active_users: Meeting } | { success: false; error: string }
+    { success: true; meeting: Meeting } | { success: false; error: string }
   > {
     try {
       await this.collectionRef.doc(meetingId).update({
@@ -140,7 +157,9 @@ class MeetingDAO {
       });
       return {
         success: true,
-        active_users: this.collectionRef.doc(meetingId).get() as Meeting,
+        meeting: (
+          await this.collectionRef.doc(meetingId).get()
+        ).data() as Meeting,
       };
     } catch (err: any) {
       console.error("Error agregando Id de Usuario a la reunión:", err);
@@ -152,7 +171,7 @@ class MeetingDAO {
     meetingId: string,
     userId: string,
   ): Promise<
-    { success: true; active_users: Meeting } | { success: false; error: string }
+    { success: true; meeting: Meeting } | { success: false; error: string }
   > {
     try {
       await this.collectionRef.doc(meetingId).update({
@@ -160,7 +179,9 @@ class MeetingDAO {
       });
       return {
         success: true,
-        active_users: this.collectionRef.doc(meetingId).get() as Meeting,
+        meeting: (
+          await this.collectionRef.doc(meetingId).get()
+        ).data() as Meeting,
       };
     } catch (err: any) {
       console.error("Error eliminando Id de Usuario de la reunión:", err);
