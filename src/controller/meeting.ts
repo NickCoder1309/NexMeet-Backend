@@ -98,7 +98,12 @@ export async function updateMeetingController(req: Request, res: Response) {
 export async function addUserMeetingController(req: Request, res: Response) {
   try {
     const meetingId = req.params.meetingId;
-    const { userId } = req.body;
+    const { userId, socketId } = req.body;
+
+    if (!socketId)
+      return res
+        .status(400)
+        .json({ error: "Falta propociar el id del socket" });
 
     if (!userId)
       return res
@@ -110,7 +115,11 @@ export async function addUserMeetingController(req: Request, res: Response) {
         .status(400)
         .json({ error: "Falta propociar el id de la reunión" });
 
-    const response = await MeetingDAO.addUserMeeting(meetingId, userId);
+    const response = await MeetingDAO.addUserMeeting(
+      meetingId,
+      userId,
+      socketId,
+    );
     if (!response.success) {
       return res
         .status(404)
@@ -130,7 +139,12 @@ export async function addUserMeetingController(req: Request, res: Response) {
 export async function removeUserMeetingController(req: Request, res: Response) {
   try {
     const meetingId = req.params.meetingId;
-    const { userId } = req.body;
+    const { userId, socketId } = req.body;
+
+    if (!socketId)
+      return res
+        .status(400)
+        .json({ error: "Falta propociar el id del socket" });
 
     if (!userId)
       return res
@@ -142,7 +156,11 @@ export async function removeUserMeetingController(req: Request, res: Response) {
         .status(400)
         .json({ error: "Falta propociar el id de la reunión" });
 
-    const response = await MeetingDAO.removeUserMeeting(meetingId, userId);
+    const response = await MeetingDAO.removeUserMeeting(
+      meetingId,
+      userId,
+      socketId,
+    );
     if (!response.success) {
       return res
         .status(404)
@@ -228,14 +246,13 @@ export async function getAllUsersInfoinMeeting(req: Request, res: Response) {
         users: [],
       });
     }
-    const usersInfoPromises = userIds.map((userId) =>
-      UserDAO.getUserById(userId),
-    );
-    const usersInfoResults = await Promise.all(usersInfoPromises);
-
-    const usersInfo = usersInfoResults
-      .filter((result) => result.success)
-      .map((result) => result.data);
+    const usersInfo = [];
+    for (const [userId, _] of userIds) {
+      const userResponse = await UserDAO.getUserById(userId);
+      if (userResponse.success) {
+        usersInfo.push(userResponse.data);
+      }
+    }
 
     return res.status(200).json({
       message: "Información de usuarios en la reunión obtenida exitosamente",

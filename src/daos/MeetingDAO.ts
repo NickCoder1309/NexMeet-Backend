@@ -10,7 +10,7 @@ export interface Meeting {
   socketId?: string | null;
   description?: string | null;
   is_active?: boolean | null;
-  active_users?: string[] | [];
+  active_users?: [userId: string, socketId: string][] | [];
   startAt?: Timestamp | null;
   finishAt?: Timestamp | null;
   createdAt?: Timestamp | null;
@@ -98,7 +98,7 @@ class MeetingDAO {
       const userId = meetingData.userId;
 
       await this.collectionRef.doc(docRef.id).update({
-        active_users: [userId],
+        active_users: [[userId, meetingData.socketId]],
       });
 
       return { success: true, id: docRef.id };
@@ -148,12 +148,13 @@ class MeetingDAO {
   async addUserMeeting(
     meetingId: string,
     userId: string,
+    socketId: string,
   ): Promise<
     { success: true; meeting: Meeting } | { success: false; error: string }
   > {
     try {
       await this.collectionRef.doc(meetingId).update({
-        active_users: FieldValue.arrayUnion(userId),
+        active_users: FieldValue.arrayUnion([userId, socketId]),
       });
       return {
         success: true,
@@ -170,12 +171,13 @@ class MeetingDAO {
   async removeUserMeeting(
     meetingId: string,
     userId: string,
+    socketId: string,
   ): Promise<
     { success: true; meeting: Meeting } | { success: false; error: string }
   > {
     try {
       await this.collectionRef.doc(meetingId).update({
-        active_users: FieldValue.arrayRemove(userId),
+        active_users: FieldValue.arrayRemove([userId, socketId]),
       });
       return {
         success: true,
