@@ -6,14 +6,19 @@ import cors from "cors";
 
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT;
+
+const origins = (process.env.ORIGIN ?? "")
+  .split(",")
+  .map((s: string) => s.trim())
+  .filter(Boolean);
 
 const app = express();
 app.use(express.json());
 
 app.use(
   cors({
-    origin: process.env.FRONTED_URL || "http://localhost:5173",
+    origin: origins,
     credentials: true,
   }),
 );
@@ -22,5 +27,5 @@ app.use("/api/users", userRoutes);
 app.use("/api/meetings", meetingRoutes);
 
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running`);
 });
