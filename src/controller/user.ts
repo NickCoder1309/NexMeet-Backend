@@ -1,3 +1,4 @@
+import { decode } from "node:querystring";
 import UserDAO from "../daos/UserDAO";
 import { Request, Response } from "express";
 
@@ -19,13 +20,12 @@ export async function registerUser(req: Request, res: Response) {
         .json({ error: "La edad debe ser un número entre 0 y 100" });
 
     const decoded = (req as any).user;
-
+    console.log("Email: ", decoded.email);
     const existingUserSnapshot = await UserDAO.getUserByEmail(decoded.email);
-    if (existingUserSnapshot) {
+    if (existingUserSnapshot.success) {
       return res.status(200).json({
         success: true,
         message: "El usuario ya existe",
-        id: existingUserSnapshot.id,
       });
     }
 
@@ -38,11 +38,9 @@ export async function registerUser(req: Request, res: Response) {
 
     return res.status(201).json(userCreated);
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: error instanceof Error ? error.message : "Error inesperado",
-      });
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : "Error inesperado",
+    });
   }
 }
 
@@ -57,11 +55,9 @@ export async function getUserByIdController(req: Request, res: Response) {
       .status(200)
       .json({ message: "Usuario encontrado", user: user.data });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: error instanceof Error ? error.message : "Error inesperado",
-      });
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : "Error inesperado",
+    });
   }
 }
 
@@ -73,11 +69,9 @@ export async function getAllUsersController(req: Request, res: Response) {
 
     return res.status(200).json({ message: "Usuarios", users: data.users });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: error instanceof Error ? error.message : "Error inesperado",
-      });
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : "Error inesperado",
+    });
   }
 }
 
@@ -95,11 +89,9 @@ export async function updateUserController(req: Request, res: Response) {
       updatedUser,
     });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: error instanceof Error ? error.message : "Error inesperado",
-      });
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : "Error inesperado",
+    });
   }
 }
 
@@ -113,10 +105,8 @@ export async function deleteUserById(req: Request, res: Response) {
     await UserDAO.deleteUser(userId);
     return res.status(200).json({ message: "Usuario eliminado exitosamente" });
   } catch (error) {
-    return res
-      .status(500)
-      .json({
-        error: error instanceof Error ? error.message : "Error inesperado",
-      });
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : "Error inesperado",
+    });
   }
 }
