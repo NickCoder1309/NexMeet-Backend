@@ -1,8 +1,11 @@
-import { decode } from "node:querystring";
 import UserDAO from "../daos/UserDAO";
 import { Request, Response } from "express";
 
-export async function registerUser(req: Request, res: Response) {
+export interface AuthenticatedRequest extends Request {
+  uid: string;
+}
+
+export async function registerUser(req: AuthenticatedRequest, res: Response) {
   try {
     const { name, age, photoURL } = req.body;
 
@@ -44,7 +47,10 @@ export async function registerUser(req: Request, res: Response) {
   }
 }
 
-export async function getUserByIdController(req: Request, res: Response) {
+export async function getUserByIdController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const userId = req.params.userId;
     const user = await UserDAO.getUserById(userId);
@@ -61,7 +67,10 @@ export async function getUserByIdController(req: Request, res: Response) {
   }
 }
 
-export async function getAllUsersController(req: Request, res: Response) {
+export async function getAllUsersController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const data = await UserDAO.getAllUsers();
     if (!data.success)
@@ -75,7 +84,10 @@ export async function getAllUsersController(req: Request, res: Response) {
   }
 }
 
-export async function updateUserController(req: Request, res: Response) {
+export async function updateUserController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const userId = req.params.userId;
     if (!userId)
@@ -95,7 +107,7 @@ export async function updateUserController(req: Request, res: Response) {
   }
 }
 
-export async function deleteUserById(req: Request, res: Response) {
+export async function deleteUserById(req: AuthenticatedRequest, res: Response) {
   try {
     const userId = req.params.userId;
     const user = await UserDAO.getUserById(userId);

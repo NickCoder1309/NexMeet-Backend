@@ -1,8 +1,15 @@
 import MeetingDAO from "../daos/MeetingDAO";
-import { Request, response, Response } from "express";
+import { Request, Response } from "express";
 import UserDAO from "../daos/UserDAO";
 
-export async function getMeetingByIdController(req: Request, res: Response) {
+export interface AuthenticatedRequest extends Request {
+  uid: string;
+}
+
+export async function getMeetingByIdController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const meetingId = req.params.meetingId;
     const meeting = await MeetingDAO.getMeetingById(meetingId);
@@ -17,7 +24,10 @@ export async function getMeetingByIdController(req: Request, res: Response) {
   }
 }
 
-export async function getAllMeetingsController(req: Request, res: Response) {
+export async function getAllMeetingsController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const meetings = await MeetingDAO.getAllMeeting();
     if (!meetings.success)
@@ -35,7 +45,10 @@ export async function getAllMeetingsController(req: Request, res: Response) {
   }
 }
 
-export async function createMeetingController(req: Request, res: Response) {
+export async function createMeetingController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const { userId, description } = req.body;
     console.log("UserId: ", userId);
@@ -61,7 +74,10 @@ export async function createMeetingController(req: Request, res: Response) {
   }
 }
 
-export async function updateMeetingController(req: Request, res: Response) {
+export async function updateMeetingController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const meetingId = req.params.meetingId;
     if (!meetingId)
@@ -87,7 +103,10 @@ export async function updateMeetingController(req: Request, res: Response) {
   }
 }
 
-export async function updateOrAddMeetingUser(req: Request, res: Response) {
+export async function updateOrAddMeetingUser(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const meetingId = req.params.meetingId;
     const { userId, socketId } = req.body;
@@ -151,7 +170,10 @@ export async function updateOrAddMeetingUser(req: Request, res: Response) {
   }
 }
 
-export async function removeUserMeetingController(req: Request, res: Response) {
+export async function removeUserMeetingController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const meetingId = req.params.meetingId;
     const { userId, socketId } = req.body;
@@ -189,7 +211,10 @@ export async function removeUserMeetingController(req: Request, res: Response) {
   }
 }
 
-export async function finishMeetingController(req: Request, res: Response) {
+export async function finishMeetingController(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const meetingId = req.params.meetingId;
     if (!meetingId)
@@ -211,7 +236,10 @@ export async function finishMeetingController(req: Request, res: Response) {
   }
 }
 
-export async function getMeetingUsers(req: Request, res: Response) {
+export async function getMeetingUsers(
+  req: AuthenticatedRequest,
+  res: Response,
+) {
   try {
     const meetingId = req.params.meetingId;
     if (!meetingId)
