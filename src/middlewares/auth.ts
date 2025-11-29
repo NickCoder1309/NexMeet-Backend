@@ -17,7 +17,7 @@ export async function verifyToken(
 
     const decodedToken = await admin.auth().verifyIdToken(idToken);
 
-    (req as any).user = decodedToken;
+    (req as any).uid = decodedToken.uid;
 
     next();
   } catch (err) {
