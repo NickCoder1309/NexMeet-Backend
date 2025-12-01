@@ -2,7 +2,7 @@ import MeetingDAO from "../daos/MeetingDAO";
 import { Request, response, Response } from "express";
 import UserDAO from "../daos/UserDAO";
 import ChatDAO, { ChatMessage } from "../daos/ChatDAO";
-import { generarResumen } from "../service/openAI";
+import { generarResumen } from "../service/summaryAI";
 
 /**
  * Retrieves a meeting by its ID and returns it to the client.
