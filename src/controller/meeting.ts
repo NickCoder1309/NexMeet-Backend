@@ -1,4 +1,4 @@
-import MeetingDAO from "../daos/MeetingDAO";
+import MeetingDAO, { MeetingWithId } from "../daos/MeetingDAO";
 import { Request, response, Response } from "express";
 import UserDAO from "../daos/UserDAO";
 import ChatDAO, { ChatMessage } from "../daos/ChatDAO";
@@ -361,6 +361,31 @@ export async function getMeetingUsers(req: Request, res: Response) {
     }
 
     return res.status(200).json(response.data.active_users);
+  } catch (error) {
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : "Error inesperado",
+    });
+  }
+}
+
+export async function getMeetingByUserController(req: Request, res: Response) {
+  try {
+    const userId = req.params.userId;
+
+    if (!userId)
+      return res
+        .status(400)
+        .json({ error: "Falta propociar el id del usuario" });
+
+    const userMeetings = await MeetingDAO.getMeetingsByUser(userId);
+
+    if (!userMeetings.success) {
+      return res
+        .status(404)
+        .json({ error: "No se encontraron reuniones del usuario" });
+    }
+
+    return res.status(200).json(userMeetings.data);
   } catch (error) {
     return res.status(500).json({
       error: error instanceof Error ? error.message : "Error inesperado",

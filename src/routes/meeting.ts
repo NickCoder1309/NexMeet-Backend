@@ -4,6 +4,7 @@ import {
   finishMeetingController,
   getAllMeetingsController,
   getMeetingByIdController,
+  getMeetingByUserController,
   getMeetingUsers,
   removeUserMeetingController,
   updateMeetingController,
@@ -15,6 +16,7 @@ const router = Router();
 router.get("", getAllMeetingsController);
 router.get("/:meetingId", getMeetingByIdController);
 router.get("/getMeetingUsers/:meetingId", getMeetingUsers);
+router.get("/getMeetingsByUser/:userId", getMeetingByUserController);
 router.post("/start", createMeetingController);
 router.put("/finish/:meetingId", finishMeetingController);
 router.put("/update/:meetingId", updateMeetingController);

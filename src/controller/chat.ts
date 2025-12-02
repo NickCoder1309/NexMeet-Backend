@@ -54,3 +54,29 @@ export async function getChatbyIdController(req: Request, res: Response) {
     });
   }
 }
+
+export async function getChatsByUserController(req: Request, res: Response) {
+  try {
+    const userId = req.params.userId;
+
+    if (!userId) {
+      return res
+        .status(400)
+        .json({ error: "Falta proporcionar el id del usuario" });
+    }
+
+    const userChats = await ChatDAO.getChatsByUser(userId);
+
+    if (!userChats.success) {
+      return res
+        .status(400)
+        .json({ error: "No se encontraron chats con ese id de usuario" });
+    }
+
+    return res.status(200).json(userChats);
+  } catch (error) {
+    return res.status(500).json({
+      error: error instanceof Error ? error.message : "Error inesperado",
+    });
+  }
+}
