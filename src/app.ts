@@ -1,6 +1,7 @@
 import dotenv from "dotenv";
 import userRoutes from "./routes/user";
 import meetingRoutes from "./routes/meeting";
+import chatRoutes from "./routes/chat";
 import express from "express";
 import cors from "cors";
 
@@ -25,6 +26,7 @@ app.use(
 
 app.use("/api/users", userRoutes);
 app.use("/api/meetings", meetingRoutes);
+app.use("/api/chats", chatRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running`);

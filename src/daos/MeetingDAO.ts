@@ -240,6 +240,37 @@ class MeetingDAO {
       return { success: false, error: err?.message ?? "Error desconocido" };
     }
   }
+
+  async getMeetingsByUser(
+    userId: string,
+  ): Promise<
+    | { success: true; data: MeetingWithId[] }
+    | { success: false; data: null; error?: string }
+  > {
+    try {
+      const meetings = await this.getAllMeeting();
+      if (!meetings.success) {
+        return { success: false, data: null };
+      }
+
+      var userMeetings: MeetingWithId[] = [];
+
+      for (var meeting of meetings.data) {
+        if (meeting.userId == userId) {
+          userMeetings.push(meeting);
+        }
+      }
+
+      return { success: true, data: userMeetings as MeetingWithId[] };
+    } catch (err: any) {
+      console.error("Error consiguiendo la reunión:", err);
+      return {
+        success: false,
+        data: null,
+        error: err?.message ?? "Error desconocido",
+      };
+    }
+  }
 }
 
 export default new MeetingDAO();
