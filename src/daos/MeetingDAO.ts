@@ -35,9 +35,17 @@ export type MeetingUpdate = Partial<
   >
 >;
 
+/**
+ * Data Access Object (DAO) for managing Meeting documents in Firestore.
+ * Provides methods to create, retrieve, update, and modify meeting data.
+ */
 class MeetingDAO {
   private collectionRef = db.collection("meetings");
 
+  /**
+   * Retrieves all meetings from Firestore.
+   * @returns Promise with success and meeting list, or failure with error.
+   */
   async getAllMeeting(): Promise<
     | { success: true; data: MeetingWithId[] }
     | { success: false; data: null; error?: string }
@@ -64,6 +72,11 @@ class MeetingDAO {
     }
   }
 
+  /**
+   * Retrieves a meeting by its ID.
+   * @param meetingId Meeting identifier.
+   * @returns Promise with meeting data or failure info.
+   */
   async getMeetingById(
     meetingId: string,
   ): Promise<
@@ -86,6 +99,11 @@ class MeetingDAO {
     }
   }
 
+  /**
+   * Creates a new meeting in Firestore.
+   * @param meetingData Data for the new meeting.
+   * @returns Promise with created meeting ID or error.
+   */
   async createMeeting(
     meetingData: MeetingCreate,
   ): Promise<
@@ -110,6 +128,12 @@ class MeetingDAO {
     }
   }
 
+  /**
+   * Updates an existing meeting.
+   * @param meetingId ID of the meeting to update.
+   * @param meetingData Fields to modify.
+   * @returns Promise with updated meeting or error.
+   */
   async updateMeeting(
     meetingId: string,
     meetingData: MeetingUpdate,
@@ -131,6 +155,11 @@ class MeetingDAO {
     }
   }
 
+  /**
+   * Marks a meeting as finished.
+   * @param meetingId ID of the meeting to close.
+   * @returns Promise indicating success or error.
+   */
   async finishMeeting(
     meetingId: string,
   ): Promise<{ success: true } | { success: false; error: string }> {
@@ -147,6 +176,13 @@ class MeetingDAO {
     }
   }
 
+  /**
+   * Adds a user to a meeting's active users list.
+   * @param meetingId ID of the meeting to update.
+   * @param userId ID of the user joining the meeting.
+   * @param socketId Socket ID associated with the user.
+   * @returns Updated meeting data or an error object.
+   */
   async addUserMeeting(
     meetingId: string,
     userId: string,
@@ -173,6 +209,14 @@ class MeetingDAO {
     }
   }
 
+  /**
+   * Removes a user from the `active_users` array of a meeting.
+   *
+   * @param {string} meetingId - ID of the meeting.
+   * @param {string} userId - ID of the user to remove.
+   * @param {string} socketId - Socket ID linked to the user.
+   * @returns {Promise<{ success: true, meeting: Meeting } | { success: false, error: string }>}
+   */
   async removeUserMeeting(
     meetingId: string,
     userId: string,
@@ -199,6 +243,14 @@ class MeetingDAO {
     }
   }
 
+  /**
+   * Updates the socketId of a specific user inside a meeting's `active_users` array.
+   *
+   * @param {string} meetingId - ID of the meeting.
+   * @param {string} userId - ID of the user whose socket must be updated.
+   * @param {string} newSocketId - New socket ID to assign.
+   * @returns {Promise<{ success: true, meeting: Meeting } | { success: false, error: string }>}
+   */
   async updateUserMeetingSocketId(
     meetingId: string,
     userId: string,
@@ -241,6 +293,13 @@ class MeetingDAO {
     }
   }
 
+  /**
+   * Retrieves all meetings that belong to a specific user by filtering the full meetings list.
+   *
+   * @param {string} userId - The ID of the user whose meetings should be returned.
+   * @returns {Promise<{ success: true, data: MeetingWithId[] } | { success: false, data: null, error?: string }>}
+   * Returns the list of meetings owned by the user, or an error object on failure.
+   */
   async getMeetingsByUser(
     userId: string,
   ): Promise<
