@@ -368,6 +368,23 @@ export async function getMeetingUsers(req: Request, res: Response) {
   }
 }
 
+/**
+ * Retrieves all meetings associated with a specific user.
+ *
+ * This controller extracts the `userId` from the request parameters and queries
+ * the database through `MeetingDAO.getMeetingsByUser`. It returns a list of meetings
+ * if found, or an appropriate error response otherwise.
+ *
+ * @param {Request} req - Express request object containing the user ID in `req.params.userId`.
+ * @param {Response} res - Express response object used to send the result back to the client.
+ *
+ * @returns {Promise<Response>} A JSON response containing:
+ *  - `200` and the user's meetings if retrieval is successful.
+ *  - `400` if the user ID is missing.
+ *  - `404` if no meetings are found for the given user.
+ *  - `500` for unexpected server errors.
+ */
+
 export async function getMeetingByUserController(req: Request, res: Response) {
   try {
     const userId = req.params.userId;
