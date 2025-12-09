@@ -16,7 +16,7 @@ export async function generarResumen(messages: ChatMessage[]) {
     const textoChat = messages.map((m) => `${m.name}: ${m.message}`).join("\n");
 
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
+      model: "gemini-2.5-flash",
     });
 
     const prompt = `
